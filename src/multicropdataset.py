@@ -15,14 +15,11 @@ import torchvision.transforms as transforms
 logger = getLogger()
 
 
-class MultiCropDatasetCifar(datasets.ImageFolder):
+class MultiCropDataset(datasets.ImageFolder):
     def __init__(self, data_path, size_crops, nmb_crops,
                  size_dataset=-1, return_index=False):
-        super(MultiCropDatasetCifar, self).__init__(data_path)
         super(MultiCropDataset, self).__init__(data_path)
         assert len(size_crops) == len(nmb_crops)
-        assert len(min_scale_crops) == len(nmb_crops)
-        assert len(max_scale_crops) == len(nmb_crops)
         if size_dataset >= 0:
             self.samples = self.samples[:size_dataset]
         self.return_index = return_index
@@ -41,11 +38,20 @@ class MultiCropDatasetCifar(datasets.ImageFolder):
             trans.extend([transforms.Compose([
                 transforms.RandomHorizontalFlip(p=0.5),
                 crop,
-                transforms.ToTensor()
+                transforms.ToTensor(),
                 normalize,
                 cutout(4, 0.5, False)
                 ])] * nmb_crops[i])
         self.trans = trans
+
+        
+    def __getitem__(self, index):
+        path, _ = self.samples[index]
+        image = self.loader(path)
+        multi_crops = list(map(lambda trans: trans(image), self.trans))
+        if self.return_index:
+            return index, multi_crops
+        return multi_crops
 
 
 
