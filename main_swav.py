@@ -40,16 +40,15 @@ parser = argparse.ArgumentParser(description="Implementation of SwAV")
 #########################
 #### data parameters ####
 #########################
-parser.add_argument("--data_path", type=str, default="/path/to/imagenet",
+
+# MODIFIED FOR CIFAR100
+parser.add_argument("--data_path", type=str, default="/home/mgj528/ffcv/cifar-100-python",
                     help="path to dataset repository")
+
 parser.add_argument("--nmb_crops", type=int, default=[2], nargs="+",
                     help="list of number of crops (example: [2, 6])")
-parser.add_argument("--size_crops", type=int, default=[224], nargs="+",
+parser.add_argument("--size_crops", type=int, default=[30], nargs="+",
                     help="crops resolutions (example: [224, 96])")
-parser.add_argument("--min_scale_crops", type=float, default=[0.14], nargs="+",
-                    help="argument in RandomResizedCrop (example: [0.14, 0.05])")
-parser.add_argument("--max_scale_crops", type=float, default=[1], nargs="+",
-                    help="argument in RandomResizedCrop (example: [1., 0.14])")
 
 #########################
 ## swav specific params #
@@ -128,12 +127,10 @@ def main():
     logger, training_stats = initialize_exp(args, "epoch", "loss")
 
     # build data
-    train_dataset = MultiCropDataset(
+    train_dataset = MultiCropDatasetCifar(
         args.data_path,
         args.size_crops,
         args.nmb_crops,
-        args.min_scale_crops,
-        args.max_scale_crops,
     )
     sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
     train_loader = torch.utils.data.DataLoader(
@@ -152,6 +149,7 @@ def main():
         hidden_mlp=args.hidden_mlp,
         output_dim=args.feat_dim,
         nmb_prototypes=args.nmb_prototypes,
+        cifar_mode=True
     )
     # synchronize batch norm layers
     if args.sync_bn == "pytorch":

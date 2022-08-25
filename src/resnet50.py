@@ -147,6 +147,7 @@ class ResNet(nn.Module):
             hidden_mlp=0,
             nmb_prototypes=0,
             eval_mode=False,
+            cifar_mode=False
     ):
         super(ResNet, self).__init__()
         if norm_layer is None:
@@ -172,9 +173,16 @@ class ResNet(nn.Module):
 
         # change padding 3 -> 2 compared to original torchvision code because added a padding layer
         num_out_filters = width_per_group * widen
-        self.conv1 = nn.Conv2d(
-            3, num_out_filters, kernel_size=7, stride=2, padding=2, bias=False
-        )
+
+
+        if cifar_mode:
+            # Less aggressive downsampling for 32x32 images
+            self.conv1 = Conv2d(3, num_out_filters, kernel_size=3, stride=1, padding=1, bias=False)
+        else:
+
+            self.conv1 = nn.Conv2d(
+                3, num_out_filters, kernel_size=7, stride=2, padding=2, bias=False
+            )
         self.bn1 = norm_layer(num_out_filters)
         self.relu = nn.ReLU(inplace=True)
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
