@@ -497,7 +497,7 @@ mean_losses = []
 train_knns = []
 val_knns = []
 
-for i in range(epochs):
+for i in tqdm(range(epochs)):
   mean_loss = train_one_epoch(model, loader_train, optimizer)
 
   mean_losses.append(mean_loss)

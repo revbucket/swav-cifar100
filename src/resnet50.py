@@ -177,7 +177,7 @@ class ResNet(nn.Module):
 
         if cifar_mode:
             # Less aggressive downsampling for 32x32 images
-            self.conv1 = Conv2d(3, num_out_filters, kernel_size=3, stride=1, padding=1, bias=False)
+            self.conv1 = nn.Conv2d(3, num_out_filters, kernel_size=3, stride=1, padding=1, bias=False)
         else:
 
             self.conv1 = nn.Conv2d(
